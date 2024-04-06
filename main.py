@@ -1,5 +1,4 @@
 import os
-from tqdm import tqdm
 from pytube import YouTube
 from datetime import datetime
 from rich.console import Console
@@ -38,7 +37,7 @@ class YouTubeDownloader:
 
         else:
             self.url = url
-            self.youtube = YouTube(self.url)
+            self.youtube = YouTube(self.url, on_progress_callback=self.on_progress)
             self.streams = self.youtube.streams
 
     def main_menu(self):
@@ -63,7 +62,7 @@ class YouTubeDownloader:
                 self.console.print(
                     "[bold red]Invalid choice. Please try again.[/bold red]"
                 )
-    
+
     def convert_seconds_to_hms(self, seconds) -> str:
         hours = seconds // 3600
         seconds %= 3600
@@ -75,6 +74,12 @@ class YouTubeDownloader:
             return f"{minutes}m {seconds}s"
         else:
             return f"{seconds}s"
+
+    def on_progress(self, stream, chunk, bytes_remaining):
+        total_size = stream.filesize
+        bytes_downloaded = total_size - bytes_remaining
+        pct_completed = bytes_downloaded / total_size * 100
+        print(f"Status: {round(pct_completed, 2)} %")
 
     def convert_to_english_date(self, date_string: str) -> str:
         date_object = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
