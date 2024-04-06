@@ -21,6 +21,7 @@ class YouTubeDownloader:
         self.youtube = None
         self.streams = None
         self.console = Console()
+        self.multi_vid_array = []
 
     def styled_input(self, prompt: str, style=None):
         if style:
@@ -81,7 +82,7 @@ class YouTubeDownloader:
         _ = total_size - bytes_remaining
         for i in tqdm(range(total_size)):
             pass
-        
+
     def convert_to_english_date(self, date_string: str) -> str:
         date_object = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
         english_date = date_object.strftime('%B %d %Y')
@@ -97,7 +98,6 @@ class YouTubeDownloader:
             justify="center",
             end="",
         )
-        thumbnail_url = self.youtube.thumbnail_url
         video_length = self.convert_seconds_to_hms(self.youtube.length)
         video_views = "{:,}".format(self.youtube.views)
         pub_date = self.convert_to_english_date(str(self.youtube.publish_date))
@@ -117,9 +117,56 @@ class YouTubeDownloader:
         else:
             path = self.styled_input("Enter download path: ", style="bold red")
             highest_resolution_stream.download(path, filename=f"{self.youtube.title}.mp4")
-            
+
     def download_multiple_videos(self):
-        self.get_video_url()
+        check = self.styled_input("Are the YouTube video links in a text file? (y/n)", style="bold red")
+
+        if check.lower() == "y":
+            pass # handle later
+        elif check.lower() == "n":
+            num_of_vids = self.styled_input("How many videos?")
+
+            try:
+                if int(num_of_vids) > 0:
+                    for _ in range(num_of_vids):
+                        url = self.styled_input("Enter YouTube Video Link: ", style="bold blue")
+                        self.multi_vid_array.append(url)
+                    
+                    for url in self.multi_vid_array:
+                        self.url = url
+                        self.youtube = YouTube(self.url, on_progress_callback=self.on_progress)
+                        self.streams = self.youtube.streams
+
+                        highest_resolution_stream = self.streams.get_highest_resolution()
+
+                        self.console.print(
+                            f"[bold red]:: {self.youtube.title} ::[bold red]\n",
+                            justify="center",
+                            end="",
+                        )
+                        video_length = self.convert_seconds_to_hms(self.youtube.length)
+                        video_views = "{:,}".format(self.youtube.views)
+                        pub_date = self.convert_to_english_date(str(self.youtube.publish_date))
+
+                        self.console.print(
+                            f"Views: {video_views}      Length: {video_length}      Published on {pub_date}",
+                            justify="center",
+                            end="",
+                            style="bold blue",
+                        )
+                        proceed = self.styled_input("Is this correct? (y/n) ", style="bold red")
+                        if proceed.lower() != "y" and "n":
+                            self.console.print("[bold red]Invalid choice. Please try again.[/bold red]")
+                            proceed = self.styled_input("Is this correct? (y/n) ", style="bold red")
+                        elif proceed.lower() == "n":
+                            self.download_single_video()
+                        else:
+                            path = self.styled_input("Enter download path: ", style="bold red")
+                            highest_resolution_stream.download(path, filename=f"{self.youtube.title}.mp4")
+
+            except Exception:
+                self.console.print("Invalid input. Please provide an integer value greater than 0.", style="bold red")
+                
 
 
 if __name__ == "__main__":
