@@ -117,7 +117,7 @@ class YouTubeDownloader:
         else:
             path = self.styled_input("Enter download path: ", style="bold red")
             highest_resolution_stream.download(path, filename=f"{self.youtube.title}.mp4")
-
+            
     def download_multiple_videos(self):
         self.get_video_url()
 
