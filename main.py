@@ -1,4 +1,5 @@
 import os
+from tqdm import tqdm
 from pytube import YouTube
 from datetime import datetime
 from rich.console import Console
@@ -77,10 +78,10 @@ class YouTubeDownloader:
 
     def on_progress(self, stream, chunk, bytes_remaining):
         total_size = stream.filesize
-        bytes_downloaded = total_size - bytes_remaining
-        pct_completed = bytes_downloaded / total_size * 100
-        print(f"Status: {round(pct_completed, 2)} %")
-
+        _ = total_size - bytes_remaining
+        for i in tqdm(range(total_size)):
+            pass
+        
     def convert_to_english_date(self, date_string: str) -> str:
         date_object = datetime.strptime(date_string, '%Y-%m-%d %H:%M:%S')
         english_date = date_object.strftime('%B %d %Y')
@@ -115,7 +116,7 @@ class YouTubeDownloader:
             self.download_single_video()
         else:
             path = self.styled_input("Enter download path: ", style="bold red")
-            highest_resolution_stream.download(path,filename=self.youtube.title,filename_prefix="Downloading: ")
+            highest_resolution_stream.download(path, filename=f"{self.youtube.title}.mp4")
 
     def download_multiple_videos(self):
         self.get_video_url()
