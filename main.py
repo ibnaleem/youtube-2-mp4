@@ -1,3 +1,11 @@
+"""
+Created by: Ibn Aleem (ibnaleem@outlook.com)
+LICENSE: This script is under the MIT License.
+GitHub: https://github.com/ibnaleem/youtube-2-mp4
+PGP Fingerprint: 2024 7EC0 23F2 769E 6618  1C0F 581B 4A2A 862B BADE
+PGP Key: https://github.com/ibnaleem/ibnaleem/blob/main/public_key.asc
+"""
+
 import os
 from tqdm import tqdm
 from pytube import YouTube
