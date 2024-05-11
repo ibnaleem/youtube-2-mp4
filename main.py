@@ -14,7 +14,6 @@ ascii_art = """
                                                                                                         
 """
 
-
 class YouTubeDownloader:
     def __init__(self) -> None:
         self.url = None
@@ -89,8 +88,10 @@ class YouTubeDownloader:
 
         return english_date
 
-    def download_single_video(self):
-        self.get_video_url()
+    def download_single_video(self, args: str = None):
+
+        if not args:
+            self.get_video_url()
         highest_resolution_stream = self.streams.get_highest_resolution()
 
         self.console.print(
@@ -119,16 +120,21 @@ class YouTubeDownloader:
             highest_resolution_stream.download(path, filename=f"{self.youtube.title}.mp4")
 
     def download_multiple_videos(self):
-        check = self.styled_input("Are the YouTube video links in a text file? (y/n)", style="bold red")
+        check = self.styled_input("Are the YouTube video links in a text file? (y/n) ", style="bold red")
 
         if check.lower() == "y":
-            pass # handle later
+            file = self.styled_input("Enter path to text file: ", style="bold red")
+            if os.path.isfile(file):
+                with open(file, "r") as f:
+                    for url in f.readlines():
+                        self.multi_vid_array.append(url)
+            else:
+                self.console.print("Invalid filepath. Please provide a valid filepath.", style="bold red")
         elif check.lower() == "n":
-            num_of_vids = self.styled_input("How many videos?")
-
+            num_of_vids = self.styled_input("How many videos? ")
             try:
                 if int(num_of_vids) > 0:
-                    for _ in range(num_of_vids):
+                    for _ in range(int(num_of_vids)):
                         url = self.styled_input("Enter YouTube Video Link: ", style="bold blue")
                         self.multi_vid_array.append(url)
                     
@@ -137,38 +143,11 @@ class YouTubeDownloader:
                         self.youtube = YouTube(self.url, on_progress_callback=self.on_progress)
                         self.streams = self.youtube.streams
 
-                        highest_resolution_stream = self.streams.get_highest_resolution()
+                        self.download_single_video("args")
 
-                        self.console.print(
-                            f"[bold red]:: {self.youtube.title} ::[bold red]\n",
-                            justify="center",
-                            end="",
-                        )
-                        video_length = self.convert_seconds_to_hms(self.youtube.length)
-                        video_views = "{:,}".format(self.youtube.views)
-                        pub_date = self.convert_to_english_date(str(self.youtube.publish_date))
-
-                        self.console.print(
-                            f"Views: {video_views}      Length: {video_length}      Published on {pub_date}",
-                            justify="center",
-                            end="",
-                            style="bold blue",
-                        )
-                        proceed = self.styled_input("Is this correct? (y/n) ", style="bold red")
-                        if proceed.lower() != "y" and "n":
-                            self.console.print("[bold red]Invalid choice. Please try again.[/bold red]")
-                            proceed = self.styled_input("Is this correct? (y/n) ", style="bold red")
-                        elif proceed.lower() == "n":
-                            self.download_single_video()
-                        else:
-                            path = self.styled_input("Enter download path: ", style="bold red")
-                            highest_resolution_stream.download(path, filename=f"{self.youtube.title}.mp4")
-
-            except Exception:
+            except TypeError:
                 self.console.print("Invalid input. Please provide an integer value greater than 0.", style="bold red")
                 
-
-
 if __name__ == "__main__":
     downloader = YouTubeDownloader()
     downloader.main_menu()
